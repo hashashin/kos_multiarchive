@@ -75,7 +75,7 @@ namespace kos_multiarchive
             {
                 GetDirs();
             }
-            if (Directory.Exists($"{_shipsdir}/Script_orig"))
+            if (Directory.Exists($"{_shipsdir}/Script_orig") && _inusearch == String.Empty)
             {
                 var now = DateTime.Now;
                 _isorig = false;

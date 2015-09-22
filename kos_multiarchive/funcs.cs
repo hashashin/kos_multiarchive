@@ -34,7 +34,7 @@ namespace kos_multiarchive
     {
         private void LoadSettings()
         {
-            KSPLog.print("[kos_multiarchive.dll] Loading Config...");
+            KSPLog.print("[kos_ma.dll] Loading Config...");
             KSP.IO.PluginConfiguration configfile = KSP.IO.PluginConfiguration.CreateForType<kos_multiarchive>();
             configfile.load();
 
@@ -45,12 +45,12 @@ namespace kos_multiarchive
             _windowRect = configfile.GetValue<Rect>("windowpos", new Rect(50f, 25f, 200f, 260f));
             _keybind = configfile.GetValue<string>("keybind", "y");
             _versionlastrun = configfile.GetValue<string>("version");
-            KSPLog.print("[kos_multiarchive.dll] Config Loaded Successfully");
+            KSPLog.print("[kos_ma.dll] Config Loaded Successfully");
         }
 
         private void SaveSettings()
         {
-            KSPLog.print("[kos_multiarchive.dll] Saving Config...");
+            KSPLog.print("[kos_ma.dll] Saving Config...");
             KSP.IO.PluginConfiguration configfile = KSP.IO.PluginConfiguration.CreateForType<kos_multiarchive>();
 
             configfile.SetValue("visible", _visible);
@@ -62,7 +62,7 @@ namespace kos_multiarchive
             configfile.SetValue("version", _version);
 
             configfile.save();
-            KSPLog.print("[kos_multiarchive.dll] Config Saved ");
+            KSPLog.print("[kos_ma.dll] Config Saved ");
         }
 
         public void Toggle()
@@ -93,7 +93,7 @@ namespace kos_multiarchive
         private void VersionCheck()
         {
             _version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            KSPLog.print("kos_multiarchive.dll version: " + _version);
+            KSPLog.print("kos_ma.dll version: " + _version);
             if ((_version != _versionlastrun) && (KSP.IO.File.Exists<kos_multiarchive>("config.xml")))
             {
                 KSP.IO.File.Delete<kos_multiarchive>("config.xml");
