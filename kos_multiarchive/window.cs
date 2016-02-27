@@ -1,5 +1,5 @@
 ﻿// -------------------------------------------------------------------------------------------------
-// kos_multiarchive 0.0.1
+// kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
 // Copyright (C) 2014 Iván Atienza
@@ -30,11 +30,11 @@ namespace kos_multiarchive
     {
         private void ListWindow(int windowId)
         {
-            if (_dirList != null)
+            if (_branchNameList != null)
             {
                 _scrollViewVector = GUILayout.BeginScrollView(_scrollViewVector);
                 var options = new[] { GUILayout.Width(160f), GUILayout.ExpandWidth(false) };
-                _selectionGridInt = GUILayout.SelectionGrid(_selectionGridInt, _dirList.ToArray(), 1, options);
+                _selectionGridInt = GUILayout.SelectionGrid(_selectionGridInt, _branchNameList.ToArray(), 1, options);
                 GUILayout.EndScrollView();
             }
             GUILayout.BeginHorizontal();
@@ -58,7 +58,7 @@ namespace kos_multiarchive
             // Refresh images list.
             if (GUILayout.Button("Refresh list"))
             {
-                GetDirs();
+                GetBranches();
             }
             GUI.contentColor = Color.white;
             // Close the list window.

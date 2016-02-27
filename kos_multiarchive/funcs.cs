@@ -1,5 +1,5 @@
 ﻿// -------------------------------------------------------------------------------------------------
-// kos_multiarchive 0.0.1
+// kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
 // Copyright (C) 2014 Iván Atienza
@@ -117,7 +117,7 @@ namespace kos_multiarchive
                 if (!Directory.Exists($"{_shipsdir}/arch_{i + 1}") && ("arch_" + (i + 1) != _inusearch) && (!Directory.Exists($"{_shipsdir}/arch_{i + 2}")))
                 {
                     Directory.CreateDirectory($"{_shipsdir}/arch_{i + 1}");
-                    GetDirs();
+                    GetBranches();
                     break;
                 }
             }
@@ -129,36 +129,36 @@ namespace kos_multiarchive
             Directory.Move($"{_shipsdir}/Script_orig", $"{_shipsdir}/Script");
             _inusearch = String.Empty;
             _isorig = true;
-            GetDirs();
+            GetBranches();
         }
 
         private void ChangeArch()
         {
-            var newarch = _dirList[_selectionGridInt];
+            var newarch = _branchNameList[_selectionGridInt];
             if (_isorig)
             {
                 _inusearch = newarch;
                 Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/Script_orig");
                 Directory.Move($"{_shipsdir}/{newarch}", $"{_shipsdir}/Script");
                 _isorig = false;
-                GetDirs();
+                GetBranches();
             }
             else if (_inusearch != newarch && _inusearch != String.Empty)
             {
                 Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/{_inusearch}");
                 Directory.Move($"{_shipsdir}/{newarch}", $"{_shipsdir}/Script");
                 _inusearch = newarch;
-                GetDirs();
+                GetBranches();
             }
         }
 
-        private void GetDirs()
+        private void GetBranches()
         {
-            _dirList = new List<string>(Directory.GetDirectories(_shipsdir, "arch_*"));
+            _branchNameList = new List<string>(Directory.GetDirectories(_shipsdir, "arch_*"));
 
-            for (int i = 0; i < _dirList.Count; i++)
+            for (int i = 0; i < _branchNameList.Count; i++)
             {
-                _dirList[i] = new DirectoryInfo(_dirList[i]).Name;
+                _branchNameList[i] = new DirectoryInfo(_branchNameList[i]).Name;
             }
         }
 

@@ -1,5 +1,5 @@
 ﻿// -------------------------------------------------------------------------------------------------
-// kos_multiarchive 0.0.1
+// kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
 // Copyright (C) 2014 Iván Atienza
@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using LibGit2Sharp;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -51,9 +52,11 @@ namespace kos_multiarchive
         private string _version;
         private string _versionlastrun;
 
-        private readonly string _shipsdir = @KSPUtil.ApplicationRootPath.Replace("\\", "/") + "Ships";
+        private readonly string _scriptdir = @KSPUtil.ApplicationRootPath.Replace("\\", "/") + "Ships/Script";
 
-        private List<string> _dirList;
+        private Repository _repo;
+        private List<Branch> _branchList;
+        private List<string> _branchNameList;
         private Vector2 _scrollViewVector = Vector2.zero;
         private int _selectionGridInt;
         private bool _isorig;
@@ -71,11 +74,11 @@ namespace kos_multiarchive
 
         void Start()
         {
-            if (_dirList == null)
+            if (_branchNameList == null)
             {
-                GetDirs();
+                GetBranches();
             }
-            if (Directory.Exists($"{_shipsdir}/Script_orig") && _inusearch == String.Empty)
+            if (Directory.Exists($"{_scriptdir}/Script_orig") && _inusearch == String.Empty)
             {
                 var now = DateTime.Now;
                 _isorig = false;
