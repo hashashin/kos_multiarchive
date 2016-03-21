@@ -45,18 +45,11 @@ namespace kos_multiarchive
             }
             if (GUILayout.Button("New"))
             {
-                if (HighLogic.LoadedSceneIsFlight)
-                {
-                    NewArch(FlightGlobals.ActiveVessel.vesselName.Replace(" ", "_"));
-                }
-                else
-                {
-                    NewArch(Random.Range(100000000,0).ToString(CultureInfo.InvariantCulture));
-                }
+                _shownewbdial = true;
             }
             if (GUILayout.Button("Del"))
             {
-                if (_branchNameList != null) DelArch(_branchNameList[_selectionGridInt]);
+                _showdeldial = true;
             }
             GUILayout.EndHorizontal();
             if (!_isorig())

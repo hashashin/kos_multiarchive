@@ -72,7 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="commit_window.cs" />
+    <Compile Include="del_window.cs" />
     <Compile Include="git_funcs.cs" />
+    <Compile Include="newb_window.cs" />
     <Compile Include="utils_funcs.cs" />
     <Compile Include="toolbarwrapper.cs" />
     <Compile Include="core.cs" />

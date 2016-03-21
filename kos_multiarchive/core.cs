@@ -23,8 +23,10 @@
 // -------------------------------------------------------------------------------------------------
 
 
-using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Linq;
+#endif
 using LibGit2Sharp;
 using UnityEngine;
 
@@ -33,13 +35,14 @@ namespace kos_multiarchive
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
     public partial class kos_multiarchive : MonoBehaviour
     {
-        private Rect _windowRect;
-        private Rect _windowRect2;
+        private Rect _windowRect, _windowRect2, _windowRect3, _windowRect4;
 
         private string _keybind;
 
         private bool _visible;
         private bool _showcommitdial;
+        private bool _shownewbdial;
+        private bool _showdeldial;
 
         private IButton _button;
         private const string Tooltipoff = "Show KOS-MA";
@@ -61,7 +64,8 @@ namespace kos_multiarchive
         private Vector2 _scrollViewVector = Vector2.zero;
         private int _selectionGridInt;
         private string _inusebranch;
-        private string _text = String.Empty;
+        private string _text = string.Empty;
+        private string _btext = string.Empty;
 
         void Awake()
         {
@@ -110,11 +114,19 @@ namespace kos_multiarchive
         {
             if (_visible)
             {
-                _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, _inusebranch);
+                _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, "Current branch: " + _inusebranch);
             }
             if (_showcommitdial)
             {
-                _windowRect2 = GUI.Window(GUIUtility.GetControlID(1, FocusType.Passive), _windowRect2, CommitWindow, "");
+                _windowRect2 = GUI.Window(GUIUtility.GetControlID(1, FocusType.Passive), _windowRect2, CommitWindow, "Commit message");
+            }
+            if (_shownewbdial)
+            {
+                _windowRect3 = GUI.Window(GUIUtility.GetControlID(2, FocusType.Passive), _windowRect3, NewBranchWindow, "New branch name");
+            }
+            if (_showdeldial)
+            {
+                _windowRect4 = GUI.Window(GUIUtility.GetControlID(3, FocusType.Passive), _windowRect4, DelWindow, "Confirm branch deletion");
             }
 #if DEBUG
             var debug = _scriptdir + "\n" + _repo.Info.WorkingDirectory + "\n" + _repo.Branches.ToList()[0].Name + "\n" +

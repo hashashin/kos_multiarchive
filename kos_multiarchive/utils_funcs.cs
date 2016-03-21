@@ -37,10 +37,12 @@ namespace kos_multiarchive
             configfile.load();
 
             _visible = configfile.GetValue<bool>("visible", false);
-            _inusebranch = configfile.GetValue<string>("actualbranch", "master");
+            _inusebranch = configfile.GetValue<string>("currentbranch", "master");
 
             _windowRect = configfile.GetValue<Rect>("windowpos", new Rect(50f, 25f, 200f, 260f));
-            _windowRect2 = configfile.GetValue<Rect>("delwindowpos", new Rect(Screen.width/2f, Screen.height/2f , 200f, 260f));
+            _windowRect2 = configfile.GetValue<Rect>("commitwindowpos", new Rect(Screen.width/2f, Screen.height/2f , 200f, 260f));
+            _windowRect3 = configfile.GetValue<Rect>("newbwindowpos", new Rect(Screen.width / 2f, Screen.height / 2f, 200f, 260f));
+            _windowRect4 = configfile.GetValue<Rect>("delwindowpos", new Rect(Screen.width / 2f, Screen.height / 2f, 300f, 120f));
             _keybind = configfile.GetValue<string>("keybind", "y");
             _versionlastrun = configfile.GetValue<string>("version");
             KSPLog.print("[kos_ma.dll] Config Loaded Successfully");
@@ -52,10 +54,12 @@ namespace kos_multiarchive
             KSP.IO.PluginConfiguration configfile = KSP.IO.PluginConfiguration.CreateForType<kos_multiarchive>();
 
             configfile.SetValue("visible", _visible);
-            configfile.SetValue("actualbranch", _inusebranch);
+            configfile.SetValue("currentbranch", _inusebranch);
 
             configfile.SetValue("windowpos", _windowRect);
-            configfile.SetValue("delwindowpos", _windowRect2);
+            configfile.SetValue("commitwindowpos", _windowRect2);
+            configfile.SetValue("newbwindowpos", _windowRect3);
+            configfile.SetValue("delwindowpos", _windowRect4);
             configfile.SetValue("keybind", _keybind);
             configfile.SetValue("version", _version);
 

@@ -10,16 +10,17 @@ namespace kos_multiarchive
     {
         private void NewArch(string branchname)
         {
-            foreach (string branch in _branchNameList)
+            try
             {
-                if (branch != branchname)
-                {
-                    _repo.CreateBranch(branchname);
-                    _repo.Checkout(branchname);
-                    _inusebranch = branchname;
-                    GetBranches();
-                    break;
-                }
+                _repo.CreateBranch(branchname);
+                _repo.Checkout(branchname);
+                _inusebranch = branchname;
+                GetBranches();
+            }
+            catch (LibGit2SharpException e)
+            {
+                ScreenMessages.PostScreenMessage(e.Message,
+                    4f, ScreenMessageStyle.UPPER_CENTER);
             }
         }
 
@@ -28,6 +29,7 @@ namespace kos_multiarchive
             try
             {
                 _repo.Branches.Remove(branchname);
+                GetBranches();
             }
 
             catch (LibGit2SharpException e)
@@ -35,20 +37,35 @@ namespace kos_multiarchive
                 ScreenMessages.PostScreenMessage(e.Message,
                     4f, ScreenMessageStyle.UPPER_CENTER);
             }
-            GetBranches();
         }
 
         private void ChangeArch()
         {
             var newbranch = _branchNameList[_selectionGridInt];
-            _repo.Checkout(newbranch);
-            _inusebranch = newbranch;
+            try
+            {
+                _repo.Checkout(newbranch);
+                _inusebranch = newbranch;
+            }
+            catch (LibGit2SharpException e)
+            {
+                ScreenMessages.PostScreenMessage(e.Message,
+                    4f, ScreenMessageStyle.UPPER_CENTER);
+            }
         }
 
         private void RestoreOrig()
         {
-            _repo.Checkout("master");
-            _inusebranch = _repo.Head.Name;
+            try
+            {
+                _repo.Checkout("master");
+                _inusebranch = _repo.Head.Name;
+            }
+            catch (LibGit2SharpException e)
+            {
+                ScreenMessages.PostScreenMessage(e.Message,
+                    4f, ScreenMessageStyle.UPPER_CENTER);
+            }
         }
 
         private void GetBranches()
