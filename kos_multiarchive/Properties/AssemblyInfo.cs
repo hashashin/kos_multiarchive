@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("kos_multiarchive")]
-[assembly: AssemblyCopyright("Copyright ©  2015 hashashin")]
+[assembly: AssemblyCopyright("Copyright ©  2016 hashashin")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

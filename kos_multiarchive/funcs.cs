@@ -2,7 +2,7 @@
 // kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
-// Copyright (C) 2014 Iván Atienza
+// Copyright (C) 2016 Iván Atienza
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 //
 // -------------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

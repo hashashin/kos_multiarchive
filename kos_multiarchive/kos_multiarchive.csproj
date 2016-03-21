@@ -64,7 +64,6 @@
       <HintPath>..\packages\LibGit2Sharp.0.17.0.0\lib\net35\LibGit2Sharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>N:\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
