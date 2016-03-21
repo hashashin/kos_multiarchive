@@ -7,11 +7,13 @@
     <ProjectGuid>{2C8D5E92-19CD-499C-916D-BCB41FBC42FC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>kos_ma</RootNamespace>
+    <RootNamespace>kos_multiarchive</RootNamespace>
     <AssemblyName>kos_ma</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,24 +58,47 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>N:\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="kOS">
+      <HintPath>N:\Kerbal Space Program\GameData\kOS\Plugins\kOS.dll</HintPath>
+    </Reference>
+    <Reference Include="kOS.Safe, Version=1.19.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>N:\Kerbal Space Program\GameData\kOS\Plugins\kOS.Safe.dll</HintPath>
+    </Reference>
+    <Reference Include="LibGit2Sharp, Version=0.17.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LibGit2Sharp.0.17.0.0\lib\net35\LibGit2Sharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>N:\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="funcs.cs" />
+    <Compile Include="commit_window.cs" />
+    <Compile Include="del_window.cs" />
+    <Compile Include="git_funcs.cs" />
+    <Compile Include="newb_window.cs" />
+    <Compile Include="utils_funcs.cs" />
     <Compile Include="toolbarwrapper.cs" />
     <Compile Include="core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="window.cs" />
+    <Compile Include="main_window.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(TargetPath)" "H:\SteamLibrary\SteamApps\common\Kerbal Space Program\GameData\kos_ma\Plugins\"</PostBuildEvent>
+    <PostBuildEvent>copy /y "$(TargetPath)" "H:\SteamLibrary\SteamApps\common\Kerbal Space Program\GameData\kos_ma\Plugins\"
+if not exist "$(TargetDir)NativeBinaries" md "$(TargetDir)NativeBinaries"
+if not exist "$(TargetDir)NativeBinaries\x86" md "$(TargetDir)NativeBinaries\x86"
+xcopy /s /y /d "$(SolutionDir)packages\LibGit2Sharp.0.17.0.0\lib\net35\NativeBinaries\x86\*.*" "$(TargetDir)NativeBinaries\x86"
+if not exist "$(TargetDir)NativeBinaries\amd64" md "$(TargetDir)NativeBinaries\amd64"
+xcopy /s /y /d "$(SolutionDir)packages\LibGit2Sharp.0.17.0.0\lib\net35\NativeBinaries\amd64\*.*" "$(TargetDir)NativeBinaries\amd64"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

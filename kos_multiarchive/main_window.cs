@@ -1,5 +1,5 @@
 ﻿// -------------------------------------------------------------------------------------------------
-// kos_multiarchive 0.0.1
+// kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
 // Copyright (C) 2014 Iván Atienza
@@ -22,6 +22,7 @@
 //
 // -------------------------------------------------------------------------------------------------
 
+using System.Globalization;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -30,11 +31,11 @@ namespace kos_multiarchive
     {
         private void ListWindow(int windowId)
         {
-            if (_dirList != null)
+            if (_branchNameList != null)
             {
                 _scrollViewVector = GUILayout.BeginScrollView(_scrollViewVector);
                 var options = new[] { GUILayout.Width(160f), GUILayout.ExpandWidth(false) };
-                _selectionGridInt = GUILayout.SelectionGrid(_selectionGridInt, _dirList.ToArray(), 1, options);
+                _selectionGridInt = GUILayout.SelectionGrid(_selectionGridInt, _branchNameList.ToArray(), 1, options);
                 GUILayout.EndScrollView();
             }
             GUILayout.BeginHorizontal();
@@ -44,23 +45,33 @@ namespace kos_multiarchive
             }
             if (GUILayout.Button("New"))
             {
-                NewArch();
+                _shownewbdial = true;
+            }
+            if (GUILayout.Button("Del"))
+            {
+                _showdeldial = true;
             }
             GUILayout.EndHorizontal();
-            if (!_isorig)
+            if (!_isorig())
             {
-                if (GUILayout.Button("Return to Original"))
+                if (GUILayout.Button("Return to master"))
                 {
                     RestoreOrig();
                 }
             }
+            GUILayout.BeginHorizontal();
             GUI.contentColor = Color.green;
             // Refresh images list.
             if (GUILayout.Button("Refresh list"))
             {
-                GetDirs();
+                GetBranches();
             }
             GUI.contentColor = Color.white;
+            if (GUILayout.Button("Commit"))
+            {
+                _showcommitdial = true;
+            }
+            GUILayout.EndHorizontal();
             // Close the list window.
             if (GUI.Button(new Rect(2f, 2f, 13f, 13f), "X"))
             {

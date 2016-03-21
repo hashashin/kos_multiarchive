@@ -1,5 +1,5 @@
 ﻿// -------------------------------------------------------------------------------------------------
-// kos_multiarchive 0.0.1
+// kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
 // Copyright (C) 2014 Iván Atienza
@@ -23,9 +23,11 @@
 // -------------------------------------------------------------------------------------------------
 
 
-using System;
 using System.Collections.Generic;
-using System.IO;
+#if DEBUG
+using System.Linq;
+#endif
+using LibGit2Sharp;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -33,11 +35,14 @@ namespace kos_multiarchive
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
     public partial class kos_multiarchive : MonoBehaviour
     {
-        private Rect _windowRect;
+        private Rect _windowRect, _windowRect2, _windowRect3, _windowRect4;
 
         private string _keybind;
 
         private bool _visible;
+        private bool _showcommitdial;
+        private bool _shownewbdial;
+        private bool _showdeldial;
 
         private IButton _button;
         private const string Tooltipoff = "Show KOS-MA";
@@ -51,13 +56,16 @@ namespace kos_multiarchive
         private string _version;
         private string _versionlastrun;
 
-        private readonly string _shipsdir = @KSPUtil.ApplicationRootPath.Replace("\\", "/") + "Ships";
+        private static readonly string _scriptdir = @KSPUtil.ApplicationRootPath.Replace("\\", "/") + "Ships/Script";
 
-        private List<string> _dirList;
+        private Repository _repo;
+        private List<Branch> _branchList;
+        private List<string> _branchNameList;
         private Vector2 _scrollViewVector = Vector2.zero;
         private int _selectionGridInt;
-        private bool _isorig;
-        private string _inusearch;
+        private string _inusebranch;
+        private string _text = string.Empty;
+        private string _btext = string.Empty;
 
         void Awake()
         {
@@ -71,15 +79,24 @@ namespace kos_multiarchive
 
         void Start()
         {
-            if (_dirList == null)
+            if (IsRepoDir())
             {
-                GetDirs();
+                _repo = new Repository(_scriptdir);
             }
-            if (Directory.Exists($"{_shipsdir}/Script_orig") && _inusearch == String.Empty)
+            else
             {
-                var now = DateTime.Now;
-                _isorig = false;
-                _inusearch = $"arch_recovered_{now.Hour}{now.Minute}{now.Second}";
+                Repository.Init(_scriptdir);
+                _repo = new Repository(_scriptdir);
+                _repo.Index.Stage("*");
+                _repo.Commit("initial commit");
+            }
+            if (_branchNameList == null)
+            {
+                GetBranches();
+            }
+            if (_inusebranch != _repo.Head.Name)
+            {
+                _repo.Checkout(_inusebranch);
             }
             if (ToolbarManager.ToolbarAvailable)
             {
@@ -97,8 +114,29 @@ namespace kos_multiarchive
         {
             if (_visible)
             {
-                _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, _inusearch);
+                _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, "Current branch: " + _inusebranch);
             }
+            if (_showcommitdial)
+            {
+                _windowRect2 = GUI.Window(GUIUtility.GetControlID(1, FocusType.Passive), _windowRect2, CommitWindow, "Commit message");
+            }
+            if (_shownewbdial)
+            {
+                _windowRect3 = GUI.Window(GUIUtility.GetControlID(2, FocusType.Passive), _windowRect3, NewBranchWindow, "New branch name");
+            }
+            if (_showdeldial)
+            {
+                _windowRect4 = GUI.Window(GUIUtility.GetControlID(3, FocusType.Passive), _windowRect4, DelWindow, "Confirm branch deletion");
+            }
+#if DEBUG
+            var debug = _scriptdir + "\n" + _repo.Info.WorkingDirectory + "\n" + _repo.Branches.ToList()[0].Name + "\n" +
+                        _branchList[0].Name + "\n";
+            if (_branchNameList != null)
+            {
+                debug += _branchNameList[0];
+            }
+            GUILayout.Label(debug);
+#endif
         }
 
         void Update()
@@ -116,6 +154,7 @@ namespace kos_multiarchive
             if (_appbutton == null) return;
             GameEvents.onGUIApplicationLauncherUnreadifying.Remove(Unreadifying);
             AppButtonRemove();
+            _repo.Dispose();
         }
     }
 }

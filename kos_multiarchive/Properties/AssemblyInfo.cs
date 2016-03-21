@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("kos_multiarchive")]
-[assembly: AssemblyCopyright("Copyright ©  2015 hashashin")]
+[assembly: AssemblyCopyright("Copyright ©  2016 hashashin")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // Puede especificar todos los valores o establecer como predeterminados los números de compilación y de revisión 
 // mediante el carácter '*', como se muestra a continuación:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.1")]
-[assembly: AssemblyFileVersion("0.1")]
+[assembly: AssemblyVersion("0.2")]
+[assembly: AssemblyFileVersion("0.2")]

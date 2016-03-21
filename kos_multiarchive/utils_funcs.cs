@@ -1,8 +1,8 @@
 ﻿// -------------------------------------------------------------------------------------------------
-// kos_multiarchive 0.0.1
+// kos_multiarchive 0.2
 //
 // Simple KSP plugin to make kos have multiple archives (poor man style).
-// Copyright (C) 2014 Iván Atienza
+// Copyright (C) 2016 Iván Atienza
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,10 +22,9 @@
 //
 // -------------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using kOS.Module;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -39,10 +38,12 @@ namespace kos_multiarchive
             configfile.load();
 
             _visible = configfile.GetValue<bool>("visible", false);
-            _inusearch = configfile.GetValue<string>("actualarch", String.Empty);
-            _isorig = configfile.GetValue<bool>("isoriginal", true);
+            _inusebranch = configfile.GetValue<string>("currentbranch", "master");
 
             _windowRect = configfile.GetValue<Rect>("windowpos", new Rect(50f, 25f, 200f, 260f));
+            _windowRect2 = configfile.GetValue<Rect>("commitwindowpos", new Rect(Screen.width/2f, Screen.height/2f , 200f, 260f));
+            _windowRect3 = configfile.GetValue<Rect>("newbwindowpos", new Rect(Screen.width / 2f, Screen.height / 2f, 200f, 260f));
+            _windowRect4 = configfile.GetValue<Rect>("delwindowpos", new Rect(Screen.width / 2f, Screen.height / 2f, 300f, 120f));
             _keybind = configfile.GetValue<string>("keybind", "y");
             _versionlastrun = configfile.GetValue<string>("version");
             KSPLog.print("[kos_ma.dll] Config Loaded Successfully");
@@ -54,10 +55,12 @@ namespace kos_multiarchive
             KSP.IO.PluginConfiguration configfile = KSP.IO.PluginConfiguration.CreateForType<kos_multiarchive>();
 
             configfile.SetValue("visible", _visible);
-            configfile.SetValue("actualarch", _inusearch);
-            configfile.SetValue("isoriginal", _isorig);
+            configfile.SetValue("currentbranch", _inusebranch);
 
             configfile.SetValue("windowpos", _windowRect);
+            configfile.SetValue("commitwindowpos", _windowRect2);
+            configfile.SetValue("newbwindowpos", _windowRect3);
+            configfile.SetValue("delwindowpos", _windowRect4);
             configfile.SetValue("keybind", _keybind);
             configfile.SetValue("version", _version);
 
@@ -110,67 +113,6 @@ namespace kos_multiarchive
             _versionlastrun = configfile.GetValue<string>("version");
         }
 
-        private void NewArch()
-        {
-            for (int i = 0; i <= 100; i++)
-            {
-                if (!Directory.Exists($"{_shipsdir}/arch_{i + 1}") && ("arch_" + (i + 1) != _inusearch) && (!Directory.Exists($"{_shipsdir}/arch_{i + 2}")))
-                {
-                    Directory.CreateDirectory($"{_shipsdir}/arch_{i + 1}");
-                    GetDirs();
-                    break;
-                }
-            }
-        }
-
-        private void RestoreOrig()
-        {
-            Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/{_inusearch}");
-            Directory.Move($"{_shipsdir}/Script_orig", $"{_shipsdir}/Script");
-            _inusearch = String.Empty;
-            _isorig = true;
-            GetDirs();
-        }
-
-        private void ChangeArch()
-        {
-            var newarch = _dirList[_selectionGridInt];
-            if (_isorig)
-            {
-                _inusearch = newarch;
-                Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/Script_orig");
-                Directory.Move($"{_shipsdir}/{newarch}", $"{_shipsdir}/Script");
-                _isorig = false;
-                GetDirs();
-            }
-            else if (_inusearch != newarch && _inusearch != String.Empty)
-            {
-                Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/{_inusearch}");
-                Directory.Move($"{_shipsdir}/{newarch}", $"{_shipsdir}/Script");
-                _inusearch = newarch;
-                GetDirs();
-            }
-        }
-
-        private void GetDirs()
-        {
-            _dirList = new List<string>(Directory.GetDirectories(_shipsdir, "arch_*"));
-
-            for (int i = 0; i < _dirList.Count; i++)
-            {
-                _dirList[i] = new DirectoryInfo(_dirList[i]).Name;
-            }
-        }
-
-        private static void LoadTexture(ref Texture2D tex, string file, string folder)
-        {
-            //File Exists check
-            if (File.Exists($"{folder}/{file}"))
-            {
-                tex.LoadImage(File.ReadAllBytes($"{folder}/{file}"));
-            }
-        }
-
         private void ApplicationLauncherReady()
         {
             if ((ApplicationLauncher.Ready) && (_appbutton == null))
@@ -195,6 +137,41 @@ namespace kos_multiarchive
         private void Unreadifying(GameScenes scene)
         {
             AppButtonRemove();
+        }
+        
+        private bool _isorig()
+        {
+            if (_inusebranch == "master")
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsRepoDir()
+        {
+            return Directory.Exists(_scriptdir + Path.DirectorySeparatorChar + ".git");
+        }
+
+        private static void LoadTexture(ref Texture2D tex, string file, string folder)
+        {
+            //File Exists check
+            if (File.Exists($"{folder}/{file}"))
+            {
+                tex.LoadImage(File.ReadAllBytes($"{folder}/{file}"));
+            }
+        }
+
+        private void UpdateKOSBootlist()
+        {
+            var parts = EditorLogic.fetch.ship.Parts;
+            foreach (var part in parts)
+            {
+                if (part.Modules.GetModules<kOSProcessor>().Count > 0)
+                {
+                    part.FindModuleImplementing<kOSProcessor>().OnStart(PartModule.StartState.Editor);
+                }
+            }
         }
     }
 }
