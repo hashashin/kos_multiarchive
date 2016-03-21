@@ -22,11 +22,8 @@
 //
 // -------------------------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using LibGit2Sharp;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -43,6 +40,7 @@ namespace kos_multiarchive
             _inusebranch = configfile.GetValue<string>("actualbranch", "master");
 
             _windowRect = configfile.GetValue<Rect>("windowpos", new Rect(50f, 25f, 200f, 260f));
+            _windowRect2 = configfile.GetValue<Rect>("delwindowpos", new Rect(Screen.width/2f, Screen.height/2f , 200f, 260f));
             _keybind = configfile.GetValue<string>("keybind", "y");
             _versionlastrun = configfile.GetValue<string>("version");
             KSPLog.print("[kos_ma.dll] Config Loaded Successfully");
@@ -57,6 +55,7 @@ namespace kos_multiarchive
             configfile.SetValue("actualbranch", _inusebranch);
 
             configfile.SetValue("windowpos", _windowRect);
+            configfile.SetValue("delwindowpos", _windowRect2);
             configfile.SetValue("keybind", _keybind);
             configfile.SetValue("version", _version);
 
@@ -109,63 +108,6 @@ namespace kos_multiarchive
             _versionlastrun = configfile.GetValue<string>("version");
         }
 
-        private void NewArch(string branchname)
-        {
-            foreach (string branch in _branchNameList)
-            {
-                if (branch != branchname)
-                {
-                    _repo.CreateBranch(branchname);
-                    _repo.Checkout(branchname);
-                    _inusebranch = branchname;
-                    GetBranches();
-                    break;
-                }
-            }
-        }
-
-        private void DelArch(string branchname)
-        {
-            if (_repo.Head.Name == branchname)
-            {
-                Debug.LogError("kos_ma.dll: Cannot delete branch '" + branchname + "' as it is the current HEAD of the repository.");
-                ScreenMessages.PostScreenMessage("Cannot delete branch '" + branchname + "' as it is the current HEAD of the repository.", 
-                    4f, ScreenMessageStyle.LOWER_CENTER);
-                return;
-            }
-            _repo.Branches.Remove(branchname);
-            GetBranches();
-        }
-
-        private void ChangeArch()
-        {
-            var newbranch = _branchNameList[_selectionGridInt];
-            _repo.Checkout(newbranch);
-            _inusebranch = newbranch;
-        }
-
-        private static void LoadTexture(ref Texture2D tex, string file, string folder)
-        {
-            //File Exists check
-            if (File.Exists($"{folder}/{file}"))
-            {
-                tex.LoadImage(File.ReadAllBytes($"{folder}/{file}"));
-            }
-        }
-
-        private void GetBranches()
-        {
-            if (_repo.Branches != null) _branchList = _repo.Branches.ToList();
-            _branchNameList = new List<string>();
-            if (_branchList.Count > 0)
-            {
-                foreach (Branch branch in _branchList)
-                {
-                    _branchNameList.Add(branch.Name);
-                }
-            }
-        }
-
         private void ApplicationLauncherReady()
         {
             if ((ApplicationLauncher.Ready) && (_appbutton == null))
@@ -191,13 +133,7 @@ namespace kos_multiarchive
         {
             AppButtonRemove();
         }
-
-        private void RestoreOrig()
-        {
-            _repo.Checkout("master");
-            _inusebranch = _repo.Head.Name;
-        }
-
+        
         private bool _isorig()
         {
             if (_inusebranch == "master")
@@ -210,6 +146,15 @@ namespace kos_multiarchive
         private bool IsRepoDir()
         {
             return Directory.Exists(_scriptdir + Path.DirectorySeparatorChar + ".git");
+        }
+
+        private static void LoadTexture(ref Texture2D tex, string file, string folder)
+        {
+            //File Exists check
+            if (File.Exists($"{folder}/{file}"))
+            {
+                tex.LoadImage(File.ReadAllBytes($"{folder}/{file}"));
+            }
         }
     }
 }

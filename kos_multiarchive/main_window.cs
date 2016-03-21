@@ -66,6 +66,7 @@ namespace kos_multiarchive
                     RestoreOrig();
                 }
             }
+            GUILayout.BeginHorizontal();
             GUI.contentColor = Color.green;
             // Refresh images list.
             if (GUILayout.Button("Refresh list"))
@@ -73,6 +74,11 @@ namespace kos_multiarchive
                 GetBranches();
             }
             GUI.contentColor = Color.white;
+            if (GUILayout.Button("Commit"))
+            {
+                _showcommitdial = true;
+            }
+            GUILayout.EndHorizontal();
             // Close the list window.
             if (GUI.Button(new Rect(2f, 2f, 13f, 13f), "X"))
             {

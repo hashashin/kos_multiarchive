@@ -23,7 +23,7 @@
 // -------------------------------------------------------------------------------------------------
 
 
-
+using System;
 using System.Collections.Generic;
 using LibGit2Sharp;
 using UnityEngine;
@@ -34,10 +34,12 @@ namespace kos_multiarchive
     public partial class kos_multiarchive : MonoBehaviour
     {
         private Rect _windowRect;
+        private Rect _windowRect2;
 
         private string _keybind;
 
         private bool _visible;
+        private bool _showcommitdial;
 
         private IButton _button;
         private const string Tooltipoff = "Show KOS-MA";
@@ -59,6 +61,7 @@ namespace kos_multiarchive
         private Vector2 _scrollViewVector = Vector2.zero;
         private int _selectionGridInt;
         private string _inusebranch;
+        private string _text = String.Empty;
 
         void Awake()
         {
@@ -80,7 +83,7 @@ namespace kos_multiarchive
             {
                 Repository.Init(_scriptdir);
                 _repo = new Repository(_scriptdir);
-                _repo.Index.Stage(".");
+                _repo.Index.Stage("*");
                 _repo.Commit("initial commit");
             }
             if (_branchNameList == null)
@@ -108,6 +111,10 @@ namespace kos_multiarchive
             if (_visible)
             {
                 _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, _inusebranch);
+            }
+            if (_showcommitdial)
+            {
+                _windowRect2 = GUI.Window(GUIUtility.GetControlID(1, FocusType.Passive), _windowRect2, CommitWindow, "");
             }
 #if DEBUG
             var debug = _scriptdir + "\n" + _repo.Info.WorkingDirectory + "\n" + _repo.Branches.ToList()[0].Name + "\n" +
