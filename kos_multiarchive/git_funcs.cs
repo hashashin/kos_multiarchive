@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using LibGit2Sharp;
-using UnityEngine;
 
 namespace kos_multiarchive
 {
@@ -16,6 +14,8 @@ namespace kos_multiarchive
                 _repo.Checkout(branchname);
                 _inusebranch = branchname;
                 GetBranches();
+                if (!HighLogic.LoadedSceneIsEditor) return;
+                UpdateKOSBootlist();
             }
             catch (LibGit2SharpException e)
             {
@@ -46,6 +46,8 @@ namespace kos_multiarchive
             {
                 _repo.Checkout(newbranch);
                 _inusebranch = newbranch;
+                if (!HighLogic.LoadedSceneIsEditor) return;
+                UpdateKOSBootlist();
             }
             catch (LibGit2SharpException e)
             {
@@ -60,6 +62,8 @@ namespace kos_multiarchive
             {
                 _repo.Checkout("master");
                 _inusebranch = _repo.Head.Name;
+                if (!HighLogic.LoadedSceneIsEditor) return;
+                UpdateKOSBootlist();
             }
             catch (LibGit2SharpException e)
             {
@@ -70,14 +74,11 @@ namespace kos_multiarchive
 
         private void GetBranches()
         {
-            if (_repo.Branches != null) _branchList = _repo.Branches.ToList();
+            if (_repo.Branches == null) return;
             _branchNameList = new List<string>();
-            if (_branchList.Count > 0)
+            foreach (Branch b in _repo.Branches.Where(b => !b.IsRemote))
             {
-                foreach (Branch branch in _branchList)
-                {
-                    _branchNameList.Add(branch.Name);
-                }
+                _branchNameList.Add(b.Name);
             }
         }
 
@@ -92,7 +93,7 @@ namespace kos_multiarchive
                 ScreenMessages.PostScreenMessage(e.Message,
                     4f, ScreenMessageStyle.UPPER_CENTER);
             }
-            
+
         }
     }
 }

@@ -18,6 +18,7 @@ namespace kos_multiarchive
             {
                 _showdeldial = false;
             }
+            GUI.DragWindow();
         }
     }
 }

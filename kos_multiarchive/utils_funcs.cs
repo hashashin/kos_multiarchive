@@ -24,6 +24,7 @@
 
 using System.IO;
 using System.Reflection;
+using kOS.Module;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -158,6 +159,18 @@ namespace kos_multiarchive
             if (File.Exists($"{folder}/{file}"))
             {
                 tex.LoadImage(File.ReadAllBytes($"{folder}/{file}"));
+            }
+        }
+
+        private void UpdateKOSBootlist()
+        {
+            var parts = EditorLogic.fetch.ship.Parts;
+            foreach (var part in parts)
+            {
+                if (part.Modules.GetModules<kOSProcessor>().Count > 0)
+                {
+                    part.FindModuleImplementing<kOSProcessor>().OnStart(PartModule.StartState.Editor);
+                }
             }
         }
     }
