@@ -22,6 +22,7 @@
 //
 // -------------------------------------------------------------------------------------------------
 
+using System.Globalization;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -44,12 +45,23 @@ namespace kos_multiarchive
             }
             if (GUILayout.Button("New"))
             {
-                NewArch();
+                if (HighLogic.LoadedSceneIsFlight)
+                {
+                    NewArch(FlightGlobals.ActiveVessel.vesselName.Replace(" ", "_"));
+                }
+                else
+                {
+                    NewArch(Random.Range(100000000,0).ToString(CultureInfo.InvariantCulture));
+                }
+            }
+            if (GUILayout.Button("Del"))
+            {
+                if (_branchNameList != null) DelArch(_branchNameList[_selectionGridInt]);
             }
             GUILayout.EndHorizontal();
-            if (!_isorig)
+            if (!_isorig())
             {
-                if (GUILayout.Button("Return to Original"))
+                if (GUILayout.Button("Return to master"))
                 {
                     RestoreOrig();
                 }

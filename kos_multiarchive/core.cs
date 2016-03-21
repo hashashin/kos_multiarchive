@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LibGit2Sharp;
 using UnityEngine;
 
@@ -52,15 +53,14 @@ namespace kos_multiarchive
         private string _version;
         private string _versionlastrun;
 
-        private readonly string _scriptdir = @KSPUtil.ApplicationRootPath.Replace("\\", "/") + "Ships/Script";
+        private static readonly string _scriptdir = @KSPUtil.ApplicationRootPath.Replace("\\", "/") + "Ships/Script";
 
         private Repository _repo;
         private List<Branch> _branchList;
         private List<string> _branchNameList;
         private Vector2 _scrollViewVector = Vector2.zero;
         private int _selectionGridInt;
-        private bool _isorig;
-        private string _inusearch;
+        private string _inusebranch;
 
         void Awake()
         {
@@ -74,15 +74,24 @@ namespace kos_multiarchive
 
         void Start()
         {
+            if (IsRepoDir())
+            {
+                _repo = new Repository(_scriptdir);
+            }
+            else
+            {
+                Repository.Init(_scriptdir);
+                _repo = new Repository(_scriptdir);
+                _repo.Index.Stage(".");
+                _repo.Commit("initial commit");
+            }
             if (_branchNameList == null)
             {
                 GetBranches();
             }
-            if (Directory.Exists($"{_scriptdir}/Script_orig") && _inusearch == String.Empty)
+            if (_inusebranch != _repo.Head.Name)
             {
-                var now = DateTime.Now;
-                _isorig = false;
-                _inusearch = $"arch_recovered_{now.Hour}{now.Minute}{now.Second}";
+                _repo.Checkout(_inusebranch);
             }
             if (ToolbarManager.ToolbarAvailable)
             {
@@ -100,8 +109,17 @@ namespace kos_multiarchive
         {
             if (_visible)
             {
-                _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, _inusearch);
+                _windowRect = GUI.Window(GUIUtility.GetControlID(0, FocusType.Passive), _windowRect, ListWindow, _inusebranch);
             }
+#if DEBUG
+            var debug = _scriptdir + "\n" + _repo.Info.WorkingDirectory + "\n" + _repo.Branches.ToList()[0].Name + "\n" +
+                        _branchList[0].Name + "\n";
+            if (_branchNameList != null)
+            {
+                debug += _branchNameList[0];
+            }
+            GUILayout.Label(debug);
+#endif
         }
 
         void Update()
@@ -119,6 +137,7 @@ namespace kos_multiarchive
             if (_appbutton == null) return;
             GameEvents.onGUIApplicationLauncherUnreadifying.Remove(Unreadifying);
             AppButtonRemove();
+            _repo.Dispose();
         }
     }
 }

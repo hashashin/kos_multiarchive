@@ -25,7 +25,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using LibGit2Sharp;
 using UnityEngine;
 
 namespace kos_multiarchive
@@ -39,8 +41,7 @@ namespace kos_multiarchive
             configfile.load();
 
             _visible = configfile.GetValue<bool>("visible", false);
-            _inusearch = configfile.GetValue<string>("actualarch", String.Empty);
-            _isorig = configfile.GetValue<bool>("isoriginal", true);
+            _inusebranch = configfile.GetValue<string>("actualbranch", "master");
 
             _windowRect = configfile.GetValue<Rect>("windowpos", new Rect(50f, 25f, 200f, 260f));
             _keybind = configfile.GetValue<string>("keybind", "y");
@@ -54,8 +55,7 @@ namespace kos_multiarchive
             KSP.IO.PluginConfiguration configfile = KSP.IO.PluginConfiguration.CreateForType<kos_multiarchive>();
 
             configfile.SetValue("visible", _visible);
-            configfile.SetValue("actualarch", _inusearch);
-            configfile.SetValue("isoriginal", _isorig);
+            configfile.SetValue("actualbranch", _inusebranch);
 
             configfile.SetValue("windowpos", _windowRect);
             configfile.SetValue("keybind", _keybind);
@@ -110,56 +110,39 @@ namespace kos_multiarchive
             _versionlastrun = configfile.GetValue<string>("version");
         }
 
-        private void NewArch()
+        private void NewArch(string branchname)
         {
-            for (int i = 0; i <= 100; i++)
+            foreach (string branch in _branchNameList)
             {
-                if (!Directory.Exists($"{_shipsdir}/arch_{i + 1}") && ("arch_" + (i + 1) != _inusearch) && (!Directory.Exists($"{_shipsdir}/arch_{i + 2}")))
+                if (branch != branchname)
                 {
-                    Directory.CreateDirectory($"{_shipsdir}/arch_{i + 1}");
+                    _repo.CreateBranch(branchname);
+                    _repo.Checkout(branchname);
+                    _inusebranch = branchname;
                     GetBranches();
                     break;
                 }
             }
         }
 
-        private void RestoreOrig()
+        private void DelArch(string branchname)
         {
-            Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/{_inusearch}");
-            Directory.Move($"{_shipsdir}/Script_orig", $"{_shipsdir}/Script");
-            _inusearch = String.Empty;
-            _isorig = true;
+            if (_repo.Head.Name == branchname)
+            {
+                Debug.LogError("kos_ma.dll: Cannot delete branch '" + branchname + "' as it is the current HEAD of the repository.");
+                ScreenMessages.PostScreenMessage("Cannot delete branch '" + branchname + "' as it is the current HEAD of the repository.", 
+                    4f, ScreenMessageStyle.LOWER_CENTER);
+                return;
+            }
+            _repo.Branches.Remove(branchname);
             GetBranches();
         }
 
         private void ChangeArch()
         {
-            var newarch = _branchNameList[_selectionGridInt];
-            if (_isorig)
-            {
-                _inusearch = newarch;
-                Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/Script_orig");
-                Directory.Move($"{_shipsdir}/{newarch}", $"{_shipsdir}/Script");
-                _isorig = false;
-                GetBranches();
-            }
-            else if (_inusearch != newarch && _inusearch != String.Empty)
-            {
-                Directory.Move($"{_shipsdir}/Script", $"{_shipsdir}/{_inusearch}");
-                Directory.Move($"{_shipsdir}/{newarch}", $"{_shipsdir}/Script");
-                _inusearch = newarch;
-                GetBranches();
-            }
-        }
-
-        private void GetBranches()
-        {
-            _branchNameList = new List<string>(Directory.GetDirectories(_shipsdir, "arch_*"));
-
-            for (int i = 0; i < _branchNameList.Count; i++)
-            {
-                _branchNameList[i] = new DirectoryInfo(_branchNameList[i]).Name;
-            }
+            var newbranch = _branchNameList[_selectionGridInt];
+            _repo.Checkout(newbranch);
+            _inusebranch = newbranch;
         }
 
         private static void LoadTexture(ref Texture2D tex, string file, string folder)
@@ -168,6 +151,19 @@ namespace kos_multiarchive
             if (File.Exists($"{folder}/{file}"))
             {
                 tex.LoadImage(File.ReadAllBytes($"{folder}/{file}"));
+            }
+        }
+
+        private void GetBranches()
+        {
+            if (_repo.Branches != null) _branchList = _repo.Branches.ToList();
+            _branchNameList = new List<string>();
+            if (_branchList.Count > 0)
+            {
+                foreach (Branch branch in _branchList)
+                {
+                    _branchNameList.Add(branch.Name);
+                }
             }
         }
 
@@ -195,6 +191,26 @@ namespace kos_multiarchive
         private void Unreadifying(GameScenes scene)
         {
             AppButtonRemove();
+        }
+
+        private void RestoreOrig()
+        {
+            _repo.Checkout("master");
+            _inusebranch = _repo.Head.Name;
+        }
+
+        private bool _isorig()
+        {
+            if (_inusebranch == "master")
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsRepoDir()
+        {
+            return Directory.Exists(_scriptdir + Path.DirectorySeparatorChar + ".git");
         }
     }
 }
